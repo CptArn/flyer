@@ -1,1 +1,11 @@
-<router-outlet></router-outlet>
+<mat-sidenav-container>
+  <mat-sidenav class="menu" [opened]="true" [mode]="'side'" [position]="'start'">
+    <app-navigation></app-navigation>
+  </mat-sidenav>
+  <mat-sidenav-content><router-outlet></router-outlet></mat-sidenav-content>
+  <mat-sidenav class="menu" [opened]="true" [mode]="'side'" [position]="'end'">
+    <app-properties></app-properties>
+  </mat-sidenav>
+</mat-sidenav-container>
+
+

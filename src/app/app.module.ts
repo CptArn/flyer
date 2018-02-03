@@ -14,9 +14,11 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ElectronService } from './providers/electron.service';
 
+import { CoreModule } from './core/core.module';
 import { AppComponent } from './app.component';
 import { NavigationComponent } from './navigation/navigation.component';
 import { CalculationModule } from './calculation/calculation.module';
+import { PropertiesModule } from './properties/properties.module';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -40,7 +42,9 @@ export function HttpLoaderFactory(http: HttpClient) {
         deps: [HttpClient]
       }
     }),
-    CalculationModule
+    CoreModule,
+    CalculationModule,
+    PropertiesModule
   ],
   providers: [ElectronService],
   bootstrap: [AppComponent]
