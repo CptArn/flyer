@@ -9,7 +9,7 @@ import { GridComponent } from '@syncfusion/ej2-ng-grids';
   templateUrl: './calculation.component.html',
   styleUrls: ['./calculation.component.scss']
 })
-export class CalculationComponent implements OnInit {
+export class CalculationComponent {
   public datasource: ILeg[];
   public properties: IProperties;
   @ViewChild(GridComponent) public grid: GridComponent;
@@ -26,73 +26,80 @@ export class CalculationComponent implements OnInit {
       fuelUse: 15
     };
 
-    this.datasource = [
-      {
-        from: 'EBUL',
-        to: 'EBZU',
-        trueHeading: 298,
-        distance: 26,
-        heading: 0,
-        groundSpeed: 0,
-        timeNeeded: 0,
-        fuelNeeded: 0
-      },
-      {
-        from: 'EBZU',
-        to: 'EBMO',
-        trueHeading: 179,
-        distance: 44,
-        heading: 0,
-        groundSpeed: 0,
-        timeNeeded: 0,
-        fuelNeeded: 0
-      },
-      {
-        from: 'EBMO',
-        to: 'EBAM',
-        trueHeading: 117,
-        distance: 28,
-        heading: 0,
-        groundSpeed: 0,
-        timeNeeded: 0,
-        fuelNeeded: 0
-      },
-      {
-        from: 'EBAM',
-        to: 'EBGG',
-        trueHeading: 85,
-        distance: 26,
-        heading: 0,
-        groundSpeed: 0,
-        timeNeeded: 0,
-        fuelNeeded: 0
-      },
-      {
-        from: 'EBGG',
-        to: 'EBUL',
-        trueHeading: 329,
-        distance: 52,
-        heading: 0,
-        groundSpeed: 0,
-        timeNeeded: 0,
-        fuelNeeded: 0
-      }
-    ];
+    this.datasource = [];
+
+    // this.datasource = [
+    //   {
+    //     from: 'EBUL',
+    //     to: 'EBZU',
+    //     trueHeading: 298,
+    //     distance: 26,
+    //     heading: 0,
+    //     groundSpeed: 0,
+    //     timeNeeded: 0,
+    //     fuelNeeded: 0
+    //   },
+    //   {
+    //     from: 'EBZU',
+    //     to: 'EBMO',
+    //     trueHeading: 179,
+    //     distance: 44,
+    //     heading: 0,
+    //     groundSpeed: 0,
+    //     timeNeeded: 0,
+    //     fuelNeeded: 0
+    //   },
+    //   {
+    //     from: 'EBMO',
+    //     to: 'EBAM',
+    //     trueHeading: 117,
+    //     distance: 28,
+    //     heading: 0,
+    //     groundSpeed: 0,
+    //     timeNeeded: 0,
+    //     fuelNeeded: 0
+    //   },
+    //   {
+    //     from: 'EBAM',
+    //     to: 'EBGG',
+    //     trueHeading: 85,
+    //     distance: 26,
+    //     heading: 0,
+    //     groundSpeed: 0,
+    //     timeNeeded: 0,
+    //     fuelNeeded: 0
+    //   },
+    //   {
+    //     from: 'EBGG',
+    //     to: 'EBUL',
+    //     trueHeading: 329,
+    //     distance: 52,
+    //     heading: 0,
+    //     groundSpeed: 0,
+    //     timeNeeded: 0,
+    //     fuelNeeded: 0
+    //   }
+    // ];
 
     this.propertiesLocalService.getProperties().subscribe((properties: IProperties) => {
       this.properties = properties;
-      this.calculateFlight();
       this.refreshGrid();
     });
   }
 
-  ngOnInit() { }
+  public dataBound() {
+    if (!this.loaded) {
+      this.loaded = true;
+      this.refreshGrid();
+    }
+  }
 
   public calculateFlight(): void {
     // adjust wind direction
     const windDirection = (this.properties.windDirection + 180) % 360;
 
     this.datasource.forEach((leg: ILeg) => {
+      debugger
       const windTrackAngle = this.degreesToRadians(leg.trueHeading - windDirection);
       const sinWindCorrectionAngule = this.properties.windSpeed * Math.sin(windTrackAngle) / this.properties.trueAirspeed;
       const windCorrectionAngule = Math.asin(sinWindCorrectionAngule);
@@ -114,7 +121,14 @@ export class CalculationComponent implements OnInit {
 
   private refreshGrid() {
     if (this.loaded) {
+      this.calculateFlight();
       this.grid.refresh();
+    }
+  }
+
+  public actionComplete(event: any) {
+    if (event.requestType === 'save') {
+      this.refreshGrid();
     }
   }
 }

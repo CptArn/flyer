@@ -1,18 +1,28 @@
-<div class="map">
-  <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d770157.6219748149!2d4.406337971468258!3d50.64984186887829!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbe!4v1517657059055" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
-</div>
-
-<div class="spacer"></div>
-
-<ej-grid [dataSource]="datasource" #legs id="legs" (dataBound)="loaded = true">
+<ej-grid
+  [dataSource]="datasource"
+  #legs
+  id="legs"
+  (dataBound)="dataBound()"
+  [editSettings]="{ allowEditing: true, allowAdding: true, allowDeleting: true }"
+  [toolbar]="['add', 'edit', 'delete']"
+  (actionComplete)="actionComplete($event)"
+>
   <e-columns>
     <e-column headerText="From" field="from"></e-column>
     <e-column headerText="To" field="to"></e-column>
-    <e-column headerText="True Heading" field="trueHeading"></e-column>
-    <e-column headerText="Distance" field="distance"></e-column>
-    <e-column headerText="Corrected Heading" field="heading"></e-column>
-    <e-column headerText="Ground Speed" field="groundSpeed"></e-column>
-    <e-column headerText="Time" field="timeNeeded"></e-column>
-    <e-column headerText="Fuel" field="fuelNeeded"></e-column>
+    <e-column headerText="True Heading" field="trueHeading" [type]="'number'"></e-column>
+    <e-column headerText="Distance" field="distance" [type]="'number'"></e-column>
+    <e-column headerText="Corrected Heading" field="heading" [allowEditing]="false" [type]="'number'"></e-column>
+    <e-column headerText="Ground Speed" field="groundSpeed" [allowEditing]="false" [type]="'number'"></e-column>
+    <e-column headerText="Time" field="timeNeeded" [allowEditing]="false" [type]="'number'"></e-column>
+    <e-column headerText="Fuel" field="fuelNeeded" [allowEditing]="false" [type]="'number'"></e-column>
   </e-columns>
 </ej-grid>
+
+<div class="mat-body-1">
+  <br>
+  <br>
+  <br>
+
+  placeholder for map
+</div>

@@ -1,9 +1,9 @@
-<mat-sidenav-container>
-  <mat-sidenav class="menu" [opened]="true" [mode]="'side'" [position]="'start'">
+<mat-sidenav-container [autosize]="true">
+  <mat-sidenav class="menu" [opened]="true" [mode]="'side'" [position]="'start'" [disableClose]="true">
     <app-navigation></app-navigation>
   </mat-sidenav>
   <mat-sidenav-content><router-outlet></router-outlet></mat-sidenav-content>
-  <mat-sidenav class="menu" [opened]="true" [mode]="'side'" [position]="'end'">
+  <mat-sidenav class="menu" [opened]="true" [mode]="'side'" [position]="'end'" [disableClose]="true" >
     <app-properties></app-properties>
   </mat-sidenav>
 </mat-sidenav-container>

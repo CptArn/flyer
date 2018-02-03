@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule, MatListModule, MatDividerModule, MatSliderModule } from '@angular/material';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GridModule, Edit, Grid } from '@syncfusion/ej2-ng-grids';
+import { GridModule, Edit, Grid, Toolbar } from '@syncfusion/ej2-ng-grids';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 
@@ -35,4 +35,4 @@ export class CoreModule {
 
 }
 
-Grid.Inject(Edit);
+Grid.Inject(Edit, Toolbar);
