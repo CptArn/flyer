@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { PropertiesLocalService } from '../shared/properties-local.service';
+import { IProperties } from '../shared/properties.class';
 
 @Component({
   selector: 'app-properties',
@@ -9,11 +11,27 @@ export class PropertiesComponent implements OnInit {
   public windSpeed: number;
   public windDirection: number;
   public indicatedSpeed: number;
-  constructor() {
+  public fuelUse: number;
+  constructor(private propertiesLocalService: PropertiesLocalService) {
     this.windSpeed = 0;
     this.windDirection = 0;
     this.indicatedSpeed = 150;
+    this.fuelUse = 15;
+
+    this.setProperties();
   }
 
   ngOnInit() { }
+
+  private setProperties() {
+    const properties: IProperties = {
+      fuel: 40,
+      trueAirspeed: this.indicatedSpeed,
+      windDirection: this.windDirection,
+      windSpeed: this.windSpeed,
+      fuelUse: this.fuelUse
+    }
+
+    this.propertiesLocalService.setProperties(properties);
+  }
 }

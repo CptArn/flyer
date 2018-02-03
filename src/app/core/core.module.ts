@@ -4,6 +4,7 @@ import { MatSidenavModule, MatListModule, MatDividerModule, MatSliderModule } fr
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GridModule, Edit, Grid } from '@syncfusion/ej2-ng-grids';
 import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
@@ -16,7 +17,8 @@ import { FormsModule } from '@angular/forms';
     MatListModule,
     MatDividerModule,
     MatSliderModule,
-    FormsModule
+    FormsModule,
+    SharedModule
   ],
   exports: [
     GridModule,

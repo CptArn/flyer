@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ILeg } from '../shared/leg.class';
+import { PropertiesLocalService } from '../shared/properties-local.service';
+import { IProperties } from '../shared/properties.class';
+import { GridComponent } from '@syncfusion/ej2-ng-grids';
 
 @Component({
   selector: 'app-calculation',
@@ -8,7 +11,21 @@ import { ILeg } from '../shared/leg.class';
 })
 export class CalculationComponent implements OnInit {
   public datasource: ILeg[];
-  constructor() {
+  public properties: IProperties;
+  @ViewChild(GridComponent) public grid: GridComponent;
+  public loaded: boolean;
+
+  constructor(private propertiesLocalService: PropertiesLocalService) {
+    this.loaded = false;
+
+    this.properties = {
+      fuel: 100,
+      trueAirspeed: 150,
+      windDirection: 0,
+      windSpeed: 0,
+      fuelUse: 15
+    };
+
     this.datasource = [
       {
         from: 'EBUL',
@@ -62,30 +79,28 @@ export class CalculationComponent implements OnInit {
       }
     ];
 
-    this.calculateFlight();
+    this.propertiesLocalService.getProperties().subscribe((properties: IProperties) => {
+      this.properties = properties;
+      this.calculateFlight();
+      this.refreshGrid();
+    });
   }
 
   ngOnInit() { }
 
   public calculateFlight(): void {
-    // init values
-    const windSpeed = 46;
-    const trueAirspeed = 150;
-    const fuelUse = 15;
-
     // adjust wind direction
-    const windDirection = (250 + 180) % 360;
+    const windDirection = (this.properties.windDirection + 180) % 360;
 
     this.datasource.forEach((leg: ILeg) => {
-      // wind to track angle
       const windTrackAngle = this.degreesToRadians(leg.trueHeading - windDirection);
-      const sinWindCorrectionAngule = windSpeed * Math.sin(windTrackAngle) / trueAirspeed;
+      const sinWindCorrectionAngule = this.properties.windSpeed * Math.sin(windTrackAngle) / this.properties.trueAirspeed;
       const windCorrectionAngule = Math.asin(sinWindCorrectionAngule);
       leg.heading = Math.round(leg.trueHeading + this.radiansToDegrees(windCorrectionAngule));
-      leg.groundSpeed = Math.round(trueAirspeed * Math.cos(windCorrectionAngule) + windSpeed * Math.cos(windTrackAngle));
+      leg.groundSpeed = Math.round(this.properties.trueAirspeed * Math.cos(windCorrectionAngule) + this.properties.windSpeed * Math.cos(windTrackAngle));
 
       leg.timeNeeded = Math.round(leg.distance / leg.groundSpeed * 60);
-      leg.fuelNeeded = Math.round(15 / 60 * leg.timeNeeded);
+      leg.fuelNeeded = Math.round(this.properties.fuelUse / 60 * leg.timeNeeded);
     });
   }
 
@@ -95,6 +110,12 @@ export class CalculationComponent implements OnInit {
 
   private radiansToDegrees(radians: number): number {
     return radians / (Math.PI * 2) * 360;
+  }
+
+  private refreshGrid() {
+    if (this.loaded) {
+      this.grid.refresh();
+    }
   }
 }
 

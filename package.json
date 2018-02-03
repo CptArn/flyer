@@ -1,19 +1,12 @@
 {
-  "name": "angular-electron",
-  "version": "2.6.0",
-  "description": "Angular 5 with Electron (Typescript + SASS + Hot Reload)",
-  "homepage": "https://github.com/maximegris/angular-electron",
+  "name": "flyer",
+  "version": "0.1.0",
+  "description": "VFR flight calculation",
+  "homepage": "https://github.com/CptArn/flyer",
   "author": {
-    "name": "Maxime GRIS",
-    "email": "maxime.gris@gmail.com"
+    "name": "Arne Vlaeminck",
+    "email": "arnevlaeminck@hotmail.com"
   },
-  "keywords": [
-    "angular",
-    "angular 5",
-    "electron",
-    "typescript",
-    "sass"
-  ],
   "main": "main.js",
   "private": true,
   "scripts": {

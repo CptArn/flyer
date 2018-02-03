@@ -4,7 +4,7 @@
 
 <div class="spacer"></div>
 
-<ej-grid [dataSource]="datasource" [editSettings]="{ allowEditing: true, allowAdding: true, allowDeleting: true }">
+<ej-grid [dataSource]="datasource" #legs id="legs" (dataBound)="loaded = true">
   <e-columns>
     <e-column headerText="From" field="from"></e-column>
     <e-column headerText="To" field="to"></e-column>

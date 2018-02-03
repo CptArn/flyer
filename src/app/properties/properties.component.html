@@ -1,8 +1,11 @@
-<p>Indicated Speed: {{indicatedSpeed}} Km/u</p>
-<mat-slider min="0" max="300" step="1" (input)="indicatedSpeed = $event.value" [ngModel]="indicatedSpeed"></mat-slider>
+<p>Indicated Speed: {{indicatedSpeed}} Km/h</p>
+<mat-slider min="0" max="300" step="1" (input)="indicatedSpeed = $event.value" [ngModel]="indicatedSpeed" (change)="setProperties()"></mat-slider>
 
-<p>Wind Speed: {{windSpeed}} Km/u</p>
-<mat-slider min="0" max="75" step="1" (input)="windSpeed = $event.value" [ngModel]="windSpeed"></mat-slider>
+<p>Fuel Use: {{fuelUse}} l/h</p>
+<mat-slider min="0" max="50" step="0.25" (input)="fuelUse = $event.value" [ngModel]="fuelUse" (change)="setProperties()"></mat-slider>
+
+<p>Wind Speed: {{windSpeed}} Km/h</p>
+<mat-slider min="0" max="75" step="1" (input)="windSpeed = $event.value" [ngModel]="windSpeed" (change)="setProperties()"></mat-slider>
 
 <p>Wind Direction: {{windDirection}} Degrees</p>
-<mat-slider min="0" max="359" step="1" (input)="windDirection = $event.value" [ngModel]="windDirection"></mat-slider>
+<mat-slider min="0" max="359" step="1" (input)="windDirection = $event.value" [ngModel]="windDirection" (change)="setProperties()"></mat-slider>
