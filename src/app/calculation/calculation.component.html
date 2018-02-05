@@ -1,3 +1,5 @@
+<div #map id="map" class="map"></div>
+
 <ej-grid
   [dataSource]="datasource"
   #legs
@@ -6,6 +8,7 @@
   [editSettings]="{ allowEditing: true, allowAdding: true, allowDeleting: true }"
   [toolbar]="['add', 'edit', 'delete']"
   (actionComplete)="actionComplete($event)"
+  height="150"
 >
   <e-columns>
     <e-column headerText="From" field="from"></e-column>
@@ -18,11 +21,3 @@
     <e-column headerText="Fuel" field="fuelNeeded" [allowEditing]="false" [type]="'number'"></e-column>
   </e-columns>
 </ej-grid>
-
-<div class="mat-body-1">
-  <br>
-  <br>
-  <br>
-
-  placeholder for map
-</div>
