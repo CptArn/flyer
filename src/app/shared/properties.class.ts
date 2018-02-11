@@ -4,4 +4,5 @@ export interface IProperties {
   windDirection: number;
   windSpeed: number;
   fuelUse: number;
+  minuteLength: number;
 }

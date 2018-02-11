@@ -19,6 +19,7 @@ export class CalculationComponent implements OnInit {
   @ViewChild(GridComponent) public grid: GridComponent;
   public loaded: boolean;
   private map: L.Map;
+  private layerGroup: L.LayerGroup;
 
   constructor(private propertiesLocalService: PropertiesLocalService) {
     this.loaded = false;
@@ -28,63 +29,13 @@ export class CalculationComponent implements OnInit {
       trueAirspeed: 150,
       windDirection: 0,
       windSpeed: 0,
-      fuelUse: 15
+      fuelUse: 15,
+      minuteLength: 2
     };
 
     this.datasource = [];
 
-    // this.datasource = [
-    //   {
-    //     from: 'EBUL',
-    //     to: 'EBZU',
-    //     trueHeading: 298,
-    //     distance: 26,
-    //     heading: 0,
-    //     groundSpeed: 0,
-    //     timeNeeded: 0,
-    //     fuelNeeded: 0
-    //   },
-    //   {
-    //     from: 'EBZU',
-    //     to: 'EBMO',
-    //     trueHeading: 179,
-    //     distance: 44,
-    //     heading: 0,
-    //     groundSpeed: 0,
-    //     timeNeeded: 0,
-    //     fuelNeeded: 0
-    //   },
-    //   {
-    //     from: 'EBMO',
-    //     to: 'EBAM',
-    //     trueHeading: 117,
-    //     distance: 28,
-    //     heading: 0,
-    //     groundSpeed: 0,
-    //     timeNeeded: 0,
-    //     fuelNeeded: 0
-    //   },
-    //   {
-    //     from: 'EBAM',
-    //     to: 'EBGG',
-    //     trueHeading: 85,
-    //     distance: 26,
-    //     heading: 0,
-    //     groundSpeed: 0,
-    //     timeNeeded: 0,
-    //     fuelNeeded: 0
-    //   },
-    //   {
-    //     from: 'EBGG',
-    //     to: 'EBUL',
-    //     trueHeading: 329,
-    //     distance: 52,
-    //     heading: 0,
-    //     groundSpeed: 0,
-    //     timeNeeded: 0,
-    //     fuelNeeded: 0
-    //   }
-    // ];
+    this.layerGroup = new L.LayerGroup();
 
     this.propertiesLocalService.getProperties().subscribe((properties: IProperties) => {
       this.properties = properties;
@@ -194,7 +145,9 @@ export class CalculationComponent implements OnInit {
           'from': String.fromCharCode(97 + i),
           'to': String.fromCharCode(98 + i),
           distance: Math.round(distance),
-          trueHeading: Math.round(angleDeg)
+          trueHeading: Math.round(angleDeg),
+          fromLatLng: e.layer._latlngs[i],
+          toLatLng: e.layer._latlngs[(i + 1)],
         }
 
         tempData.push(legToAdd);
@@ -204,8 +157,15 @@ export class CalculationComponent implements OnInit {
       this.calculateFlight();
       // this.refreshGrid();
 
-      // Do whatever else you need to. (save to db; add to map etc)
-      this.map.addLayer(layer);
+      this.datasource.forEach((leg: ILeg) => {
+        L.polyline([leg.fromLatLng, leg.toLatLng], {
+          opacity: 1,
+          color: 'black',
+          smoothFactor: 0
+        }).addTo(this.layerGroup);
+
+        this.layerGroup.addTo(this.map);
+      });
    });
   }
 }

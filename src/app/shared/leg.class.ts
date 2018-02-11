@@ -1,3 +1,4 @@
+import { LatLngTuple } from 'leaflet';
 export interface ILeg {
   from: String;
   to: String;
@@ -7,4 +8,6 @@ export interface ILeg {
   groundSpeed?: number;
   timeNeeded?: number;
   fuelNeeded?: number;
+  fromLatLng: LatLngTuple;
+  toLatLng: LatLngTuple;
 }

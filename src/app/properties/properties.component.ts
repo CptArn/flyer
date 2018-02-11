@@ -29,7 +29,8 @@ export class PropertiesComponent implements OnInit {
       trueAirspeed: this.indicatedSpeed,
       windDirection: this.windDirection,
       windSpeed: this.windSpeed,
-      fuelUse: this.fuelUse
+      fuelUse: this.fuelUse,
+      minuteLength: 2
     }
 
     this.propertiesLocalService.setProperties(properties);
