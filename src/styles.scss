@@ -10,6 +10,15 @@ html, body {
   background-image: url('./assets/spritesheet.svg');
 }
 
+.minute-marker {
+  background: black;
+  position: absolute;
+  margin-left: -2px !important;
+  margin-top: -10px !important;
+  width: 4px !important;
+  height: 10px !important;
+}
+
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 @import '~@angular/material/theming';
 @import "~@syncfusion/ej2-ng-grids/styles/material.css";

@@ -6,7 +6,8 @@ import { GridComponent } from '@syncfusion/ej2-ng-grids';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import { latLng } from 'leaflet';
-import { LatLng } from 'leaflet';
+import { along } from '@turf/turf';
+import { lineString } from '@turf/helpers';
 
 @Component({
   selector: 'app-calculation',
@@ -119,8 +120,6 @@ export class CalculationComponent implements OnInit {
      this.map.on(L.Draw.Event.CREATED, (e: any) => {
       const type = e.layerType;
       const layer = e.layer;
-      console.log(e);
-
 
       const tempData: any = [];
 
@@ -158,11 +157,26 @@ export class CalculationComponent implements OnInit {
       // this.refreshGrid();
 
       this.datasource.forEach((leg: ILeg) => {
-        L.polyline([leg.fromLatLng, leg.toLatLng], {
+        const line: any = L.polyline([leg.fromLatLng, leg.toLatLng], {
           opacity: 1,
           color: 'black',
           smoothFactor: 0
-        }).addTo(this.layerGroup);
+        });
+
+        const minuteSegments = Math.floor(leg.timeNeeded / this.properties.minuteLength);
+        const legDistanceMinute = leg.distance / leg.timeNeeded;
+        const lineStringTest = lineString([[leg.fromLatLng['lng'], leg.fromLatLng['lat']], [leg.toLatLng['lng'], leg.toLatLng['lat']]]);
+
+        for (let i = 0; i < minuteSegments; i++) {
+          const calc = along(lineStringTest, legDistanceMinute * (i + 1) * this.properties.minuteLength, {});
+
+          L.marker(latLng(calc.geometry.coordinates[1], calc.geometry.coordinates[0]), {
+            icon: L.divIcon({className: 'leaflet-div-icon minute-marker'}),
+            rotationAngle: (leg.trueHeading + 90) % 360
+          } as any).addTo(this.map);
+        }
+
+        line.addTo(this.map);
 
         this.layerGroup.addTo(this.map);
       });

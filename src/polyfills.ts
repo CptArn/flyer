@@ -66,3 +66,5 @@ import 'zone.js/dist/zone-mix'; // Included with Angular CLI.
  */
 // import 'intl';  // Run `npm install --save intl`.
 require('../node_modules/hammerjs/hammer.min.js');
+require('leaflet');
+require('../node_modules/leaflet-rotatedmarker/leaflet.rotatedMarker.js');
