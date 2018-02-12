@@ -19,6 +19,7 @@ import { AppComponent } from './app.component';
 import { NavigationComponent } from './navigation/navigation.component';
 import { CalculationModule } from './calculation/calculation.module';
 import { PropertiesModule } from './properties/properties.module';
+import { SharedModule } from './shared/shared.module';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -43,6 +44,7 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     }),
     CoreModule,
+    SharedModule,
     CalculationModule,
     PropertiesModule
   ],

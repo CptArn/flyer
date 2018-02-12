@@ -6,7 +6,7 @@ import { GridComponent } from '@syncfusion/ej2-ng-grids';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import { latLng } from 'leaflet';
-import { along } from '@turf/turf';
+import { along, midpoint } from '@turf/turf';
 import { lineString } from '@turf/helpers';
 
 @Component({
@@ -156,6 +156,8 @@ export class CalculationComponent implements OnInit {
       this.calculateFlight();
       // this.refreshGrid();
 
+
+      // minute lines
       this.datasource.forEach((leg: ILeg) => {
         const line: any = L.polyline([leg.fromLatLng, leg.toLatLng], {
           opacity: 1,
@@ -171,17 +173,58 @@ export class CalculationComponent implements OnInit {
           const calc = along(lineStringTest, legDistanceMinute * (i + 1) * this.properties.minuteLength, {});
 
           L.marker(latLng(calc.geometry.coordinates[1], calc.geometry.coordinates[0]), {
-            icon: L.divIcon({className: 'leaflet-div-icon minute-marker'}),
+            icon: L.divIcon({className: 'minute-marker'}),
             rotationAngle: (leg.trueHeading + 90) % 360
           } as any).addTo(this.map);
         }
+
+        // const calcMid = midpoint(lineStringTest.geometry.coordinates[0], lineStringTest.geometry.coordinates[1]);
+
+        // L.marker(latLng(calcMid.geometry.coordinates[1], calcMid.geometry.coordinates[0]), {
+        //   icon: L.divIcon({className: 'mid-marker', html: '<app-leg-visualizer></app-leg-visualizer>'}),
+        //   rotationAngle: (leg.trueHeading + 90) % 360
+        // } as any).addTo(this.map);
 
         line.addTo(this.map);
 
         this.layerGroup.addTo(this.map);
       });
    });
+
+  }
+
+  public exportToGPX(): string {
+    let gpxfile = `
+      <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="flyer">
+          <metadata>
+              <name>Export by flyer</name>
+          </metadata>
+          <rte>
+              <name>Test Export</name>
+              {{routeData}}
+          </rte>
+      </gpx>
+    `;
+
+    let dataString = '';
+
+
+    this.datasource.forEach((leg: ILeg) => {
+      dataString += `
+        <rtept lon="${leg.fromLatLng['lng']}" lat="${leg.fromLatLng['lat']}">
+            <ele>0.0</ele>
+            <name>${leg.from}</name>
+        </rtept>
+        <rtept lon="${leg.toLatLng['lng']}" lat="${leg.toLatLng['lat']}">
+            <ele>0.0</ele>
+            <name>${leg.to}</name>
+        </rtept>
+      `;
+    });
+
+    gpxfile = gpxfile.replace('{{routeData}}', dataString);
+
+    return gpxfile;
   }
 }
-
-
