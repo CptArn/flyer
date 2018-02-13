@@ -92,13 +92,32 @@ export class CalculationComponent implements OnInit {
     // Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     // Add 'implements OnInit' to the class.
 
-    this.map = L.map('map', {
-      center: [51.135, 3.50],
-      zoom: 10
+    let openStreetMap: L.TileLayer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {minZoom: 5, maxZoom: 10});
+    let googleSatelite: L.TileLayer = new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
 
-    this.map.addLayer(new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {minZoom: 5, maxZoom: 10}));
-    this.map.addLayer(new L.TileLayer('assets/512/latest/{z}/{x}/{y}.png', {minZoom: 5, maxZoom: 10}));
+    let openFlightMap: L.TileLayer = new L.TileLayer('assets/512/latest/{z}/{x}/{y}.png');
+
+    this.map = L.map('map', {
+      center: [51.135, 3.50],
+      zoom: 10,
+      maxZoom: 10,
+      minZoom: 5,
+      layers: [openStreetMap, googleSatelite, openFlightMap]
+    });
+
+    let baseMaps = {
+      'Google Satellite': googleSatelite,
+      'Open Street Map': openStreetMap
+    };
+
+    let overlayMaps = {
+      'OpenFlightMap': openFlightMap
+    };
+
+    L.control.layers(baseMaps, overlayMaps).addTo(this.map);
+
 
      // FeatureGroup is to store editable layers
      const drawnItems = new L.FeatureGroup();
