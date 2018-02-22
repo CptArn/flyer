@@ -7,7 +7,7 @@ import * as L from 'leaflet';
 import 'leaflet-draw';
 import { latLng } from 'leaflet';
 import { along, midpoint } from '@turf/turf';
-import { lineString } from '@turf/helpers';
+import { lineString } from '@turf/turf';
 import { DegreesToRadians, RadiansToDegrees } from '../shared/helpers.class';
 
 @Component({

@@ -12,11 +12,13 @@ export class PropertiesComponent implements OnInit {
   public windDirection: number;
   public indicatedSpeed: number;
   public fuelUse: number;
+  public minuteLine: number;
   constructor(private propertiesLocalService: PropertiesLocalService) {
     this.windSpeed = 0;
     this.windDirection = 0;
     this.indicatedSpeed = 150;
     this.fuelUse = 15;
+    this.minuteLine = 2;
 
     this.setProperties();
   }
@@ -30,7 +32,7 @@ export class PropertiesComponent implements OnInit {
       windDirection: this.windDirection,
       windSpeed: this.windSpeed,
       fuelUse: this.fuelUse,
-      minuteLength: 2
+      minuteLength: this.minuteLine
     }
 
     this.propertiesLocalService.setProperties(properties);

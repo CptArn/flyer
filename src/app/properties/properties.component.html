@@ -10,4 +10,7 @@
 
     <p>Wind Direction: {{windDirection}} Degrees</p>
     <mat-slider min="0" max="359" step="1" (input)="windDirection = $event.value" [ngModel]="windDirection" (change)="setProperties()"></mat-slider>
+
+    <p>Line after {{minuteLine}} minute{{minuteLine > 1 ? 's' : ''}}</p>
+    <mat-slider min="1" max="20" step="1" (input)="minuteLine = $event.value" [ngModel]="minuteLine" (change)="setProperties()"></mat-slider>
 </div>
