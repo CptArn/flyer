@@ -8,6 +8,7 @@ import 'leaflet-draw';
 import { latLng } from 'leaflet';
 import { along, midpoint } from '@turf/turf';
 import { lineString } from '@turf/helpers';
+import { DegreesToRadians, RadiansToDegrees } from '../shared/helpers.class';
 
 @Component({
   selector: 'app-calculation',
@@ -20,10 +21,13 @@ export class CalculationComponent implements OnInit {
   @ViewChild(GridComponent) public grid: GridComponent;
   public loaded: boolean;
   private map: L.Map;
-  private layerGroup: L.LayerGroup;
+  private route: L.FeatureGroup;
+  private minuteLines: L.FeatureGroup;
 
   constructor(private propertiesLocalService: PropertiesLocalService) {
     this.loaded = false;
+    this.route = new L.FeatureGroup();
+    this.minuteLines = new L.FeatureGroup();
 
     this.properties = {
       fuel: 100,
@@ -35,8 +39,6 @@ export class CalculationComponent implements OnInit {
     };
 
     this.datasource = [];
-
-    this.layerGroup = new L.LayerGroup();
 
     this.propertiesLocalService.getProperties().subscribe((properties: IProperties) => {
       this.properties = properties;
@@ -56,10 +58,10 @@ export class CalculationComponent implements OnInit {
     const windDirection = (this.properties.windDirection + 180) % 360;
 
     this.datasource.forEach((leg: ILeg) => {
-      const windTrackAngle = this.degreesToRadians(leg.trueHeading - windDirection);
+      const windTrackAngle = DegreesToRadians(leg.trueHeading - windDirection);
       const sinWindCorrectionAngule = this.properties.windSpeed * Math.sin(windTrackAngle) / this.properties.trueAirspeed;
       const windCorrectionAngule = Math.asin(sinWindCorrectionAngule);
-      leg.heading = Math.round(leg.trueHeading + this.radiansToDegrees(windCorrectionAngule));
+      leg.heading = Math.round(leg.trueHeading + RadiansToDegrees(windCorrectionAngule));
       leg.groundSpeed = Math.round(this.properties.trueAirspeed * Math.cos(windCorrectionAngule) + this.properties.windSpeed * Math.cos(windTrackAngle));
 
       leg.timeNeeded = Math.round(leg.distance / leg.groundSpeed * 60);
@@ -67,19 +69,13 @@ export class CalculationComponent implements OnInit {
     });
   }
 
-  private degreesToRadians(degrees: number): number {
-    return (degrees / 360) * (Math.PI * 2);
-  }
-
-  private radiansToDegrees(radians: number): number {
-    return radians / (Math.PI * 2) * 360;
-  }
-
   private refreshGrid() {
     if (this.loaded) {
-      this.calculateFlight();
       this.grid.refresh();
     }
+
+    this.calculateFlight();
+    this.drawMinuteLines();
   }
 
   public actionComplete(event: any) {
@@ -118,13 +114,13 @@ export class CalculationComponent implements OnInit {
 
     L.control.layers(baseMaps, overlayMaps).addTo(this.map);
 
-
      // FeatureGroup is to store editable layers
-     const drawnItems = new L.FeatureGroup();
-     this.map.addLayer(drawnItems);
-     const drawControl = new L.Control.Draw({
+    this.map.addLayer(this.route);
+    this.map.addLayer(this.minuteLines);
+
+    const drawControl = new L.Control.Draw({
          edit: {
-             featureGroup: drawnItems
+          featureGroup: this.route
          },
          draw: {
            circle: false,
@@ -133,83 +129,102 @@ export class CalculationComponent implements OnInit {
            polygon: false,
            rectangle: false
          }
-     });
-     this.map.addControl(drawControl);
+    });
 
-     this.map.on(L.Draw.Event.CREATED, (e: any) => {
-      const type = e.layerType;
-      const layer = e.layer;
+    this.map.addControl(drawControl);
 
-      const tempData: any = [];
+    this.map.on(L.Draw.Event.CREATED, (e?: any) => {
+      // new line
+      this.redraw(e);
+    });
 
-      const arrayLength: number = e.layer._latlngs.length;
-      for (let i = 0; i < arrayLength - 1; i++) {
-        const angleDeg = (Math.atan2(e.layer._latlngs[(i + 1)].lng - e.layer._latlngs[i].lng, e.layer._latlngs[(i + 1)].lat - e.layer._latlngs[i].lat) * 180 / Math.PI + 360 ) % 360;
+    this.map.on(L.Draw.Event.EDITSTART, () => {
+      this.clearMintueLines();
+    });
 
-        const R = 6371; // metres
-        const φ1 = this.degreesToRadians(e.layer._latlngs[i].lat);
-        const φ2 = this.degreesToRadians(e.layer._latlngs[(i + 1)].lat);
-        const Δφ = this.degreesToRadians(e.layer._latlngs[(i + 1)].lat - e.layer._latlngs[i].lat);
-        const Δλ = this.degreesToRadians(e.layer._latlngs[(i + 1)].lng - e.layer._latlngs[i].lng);
+    this.map.on(L.Draw.Event.EDITED, (e?: any) => {
+      this.redraw({layer: e.layers._layers[Object.keys(e.layers._layers)[0]]});
+    });
 
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    this.map.on(L.Draw.Event.DELETED, () => {
+      // deleted
+      this.datasource = [];
+      this.calculateFlight();
+    });
+  }
 
-        const distance = R * c;
+  private redraw(e?: any) {
+    if (e) {
+      this.convertDrawEventToRoute(e);
+    }
 
-        const legToAdd: ILeg = {
-          'from': String.fromCharCode(97 + i),
-          'to': String.fromCharCode(98 + i),
-          distance: Math.round(distance),
-          trueHeading: Math.round(angleDeg),
-          fromLatLng: e.layer._latlngs[i],
-          toLatLng: e.layer._latlngs[(i + 1)],
-        }
+    this.calculateFlight();
+    this.drawMinuteLines();
+  }
 
-        tempData.push(legToAdd);
+  private convertDrawEventToRoute(e: any) {
+    const layer: L.Layer = e.layer;
+    layer.addTo(this.route);
+    const tempData: any = [];
+
+    const arrayLength: number = e.layer._latlngs.length;
+    for (let i = 0; i < arrayLength - 1; i++) {
+      const angleDeg = (Math.atan2(e.layer._latlngs[(i + 1)].lng - e.layer._latlngs[i].lng, e.layer._latlngs[(i + 1)].lat - e.layer._latlngs[i].lat) * 180 / Math.PI + 360 ) % 360;
+
+      const R = 6371; // metres
+
+      const φ1 = DegreesToRadians(e.layer._latlngs[i].lat);
+      const φ2 = DegreesToRadians(e.layer._latlngs[(i + 1)].lat);
+      const Δφ = DegreesToRadians(e.layer._latlngs[(i + 1)].lat - e.layer._latlngs[i].lat);
+      const Δλ = DegreesToRadians(e.layer._latlngs[(i + 1)].lng - e.layer._latlngs[i].lng);
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      const distance = R * c;
+
+      const legToAdd: ILeg = {
+        'from': String.fromCharCode(97 + i),
+        'to': String.fromCharCode(98 + i),
+        distance: Math.round(distance),
+        trueHeading: Math.round(angleDeg),
+        fromLatLng: e.layer._latlngs[i],
+        toLatLng: e.layer._latlngs[(i + 1)],
       }
 
-      this.datasource = tempData;
-      this.calculateFlight();
-      // this.refreshGrid();
+      tempData.push(legToAdd);
+    }
 
+    this.datasource = tempData;
+  }
 
-      // minute lines
-      this.datasource.forEach((leg: ILeg) => {
-        const line: any = L.polyline([leg.fromLatLng, leg.toLatLng], {
-          opacity: 1,
-          color: 'black',
-          smoothFactor: 0
-        });
+  private drawMinuteLines(): void {
+    this.clearMintueLines();
+    this.datasource.forEach((leg: ILeg) => {
+      const layer = new L.LayerGroup();
 
-        const minuteSegments = Math.floor(leg.timeNeeded / this.properties.minuteLength);
-        const legDistanceMinute = leg.distance / leg.timeNeeded;
-        const lineStringTest = lineString([[leg.fromLatLng['lng'], leg.fromLatLng['lat']], [leg.toLatLng['lng'], leg.toLatLng['lat']]]);
+      const minuteSegments = Math.floor(leg.timeNeeded / this.properties.minuteLength);
+      const legDistanceMinute = leg.distance / leg.timeNeeded;
+      const lineStringTest = lineString([[leg.fromLatLng['lng'], leg.fromLatLng['lat']], [leg.toLatLng['lng'], leg.toLatLng['lat']]]);
 
-        for (let i = 0; i < minuteSegments; i++) {
-          const calc = along(lineStringTest, legDistanceMinute * (i + 1) * this.properties.minuteLength, {});
+      for (let i = 0; i < minuteSegments; i++) {
+        const calc = along(lineStringTest, legDistanceMinute * (i + 1) * this.properties.minuteLength, {});
 
-          L.marker(latLng(calc.geometry.coordinates[1], calc.geometry.coordinates[0]), {
-            icon: L.divIcon({className: 'minute-marker'}),
-            rotationAngle: (leg.trueHeading + 90) % 360
-          } as any).addTo(this.map);
-        }
+        L.marker(latLng(calc.geometry.coordinates[1], calc.geometry.coordinates[0]), {
+          icon: L.divIcon({className: 'minute-marker'}),
+          rotationAngle: (leg.trueHeading + 90) % 360
+        } as any).addTo(layer);
+      }
 
-        // const calcMid = midpoint(lineStringTest.geometry.coordinates[0], lineStringTest.geometry.coordinates[1]);
+      layer.addTo(this.minuteLines);
 
-        // L.marker(latLng(calcMid.geometry.coordinates[1], calcMid.geometry.coordinates[0]), {
-        //   icon: L.divIcon({className: 'mid-marker', html: '<app-leg-visualizer></app-leg-visualizer>'}),
-        //   rotationAngle: (leg.trueHeading + 90) % 360
-        // } as any).addTo(this.map);
+    });
+  }
 
-        line.addTo(this.map);
-
-        this.layerGroup.addTo(this.map);
-      });
-   });
-
+  private clearMintueLines(): void {
+    this.minuteLines.clearLayers();
   }
 
   public exportToGPX(): string {

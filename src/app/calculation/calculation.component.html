@@ -6,15 +6,38 @@
   id="legs"
   (dataBound)="dataBound()"
   [editSettings]="{ allowEditing: true, allowAdding: true, allowDeleting: true }"
-  [toolbar]="['add', 'edit', 'delete']"
   (actionComplete)="actionComplete($event)"
   height="150"
 >
+
+<!-- [toolbar]="['add', 'edit', 'delete']" -->
+
   <e-columns>
     <e-column headerText="From" field="from"></e-column>
     <e-column headerText="To" field="to"></e-column>
     <e-column headerText="True Heading" field="trueHeading" [type]="'number'"></e-column>
     <e-column headerText="Distance" field="distance" [type]="'number'"></e-column>
+    <e-column headerText="From Lat" type="string">
+      <ng-template #template let-data>
+        {{data.fromLatLng.lat}}
+      </ng-template>
+    </e-column>
+    <e-column headerText="From Lng" type="string">
+      <ng-template #template let-data>
+        {{data.fromLatLng.lng}}
+      </ng-template>
+    </e-column>
+    <e-column headerText="To Lat" type="string">
+      <ng-template #template let-data>
+        {{data.toLatLng.lat}}
+      </ng-template>
+    </e-column>
+    <e-column headerText="To Lng" type="string">
+      <ng-template #template let-data>
+        {{data.toLatLng.lng}}
+      </ng-template>
+    </e-column>
+
     <e-column headerText="Corrected Heading" field="heading" [allowEditing]="false" [type]="'number'"></e-column>
     <e-column headerText="Ground Speed" field="groundSpeed" [allowEditing]="false" [type]="'number'"></e-column>
     <e-column headerText="Time" field="timeNeeded" [allowEditing]="false" [type]="'number'"></e-column>
