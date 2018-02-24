@@ -74,7 +74,7 @@ try {
     dialog.showSaveDialog(win,
       {
         title: 'Save Route To GPX',
-        defaultPath: ' %USERPROFILE%\\route.gpx',
+        defaultPath: process.platform !== 'darwin' ? '%USERPROFILE%\\route.gpx' : 'route.gpx',
         filters: [
           {name: 'GPS File', extensions: ['gpx']}
         ]
