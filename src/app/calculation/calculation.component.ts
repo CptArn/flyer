@@ -9,6 +9,7 @@ import { latLng } from 'leaflet';
 import { along, midpoint } from '@turf/turf';
 import { lineString } from '@turf/turf';
 import { DegreesToRadians, RadiansToDegrees } from '../shared/helpers.class';
+import { ElectronService } from '../providers/electron.service';
 
 @Component({
   selector: 'app-calculation',
@@ -24,7 +25,7 @@ export class CalculationComponent implements OnInit {
   private route: L.FeatureGroup;
   private minuteLines: L.FeatureGroup;
 
-  constructor(private propertiesLocalService: PropertiesLocalService) {
+  constructor(private propertiesLocalService: PropertiesLocalService, private electronService: ElectronService) {
     this.loaded = false;
     this.route = new L.FeatureGroup();
     this.minuteLines = new L.FeatureGroup();
@@ -260,5 +261,9 @@ export class CalculationComponent implements OnInit {
     gpxfile = gpxfile.replace('{{routeData}}', dataString);
 
     return gpxfile;
+  }
+
+  public saveGPXFile(): void {
+    this.electronService.ipcRenderer.send('route.save.gpx', this.exportToGPX());
   }
 }

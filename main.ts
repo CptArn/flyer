@@ -1,5 +1,6 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, ipcMain, dialog } from 'electron';
 import * as path from 'path';
+import * as fs from 'fs';
 
 let win, serve;
 const args = process.argv.slice(1);
@@ -68,6 +69,24 @@ try {
       createWindow();
     }
   });
+
+  ipcMain.on('route.save.gpx', (event: any, content: string) => {
+    dialog.showSaveDialog(win,
+      {
+        title: 'Save Route To GPX',
+        defaultPath: ' %USERPROFILE%\\route.gpx',
+        filters: [
+          {name: 'GPS File', extensions: ['gpx']}
+        ]
+      }
+      , (filename: string) => {
+        try {
+          fs.writeFile(filename, content);
+        } catch (exception) {
+          // catch exception
+        }
+    });
+  })
 
 } catch (e) {
   // Catch Error
