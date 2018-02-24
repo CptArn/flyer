@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PropertiesLocalService } from '../shared/properties-local.service';
 import { IProperties } from '../shared/properties.class';
+import { PropertiesService } from './properties.service';
 
 @Component({
   selector: 'app-properties',
@@ -13,12 +14,23 @@ export class PropertiesComponent implements OnInit {
   public indicatedSpeed: number;
   public fuelUse: number;
   public minuteLine: number;
-  constructor(private propertiesLocalService: PropertiesLocalService) {
+  public useLiveWeather: boolean;
+  public weather: any;
+
+  constructor(private propertiesLocalService: PropertiesLocalService, private propertiesService: PropertiesService) {
     this.windSpeed = 0;
     this.windDirection = 0;
     this.indicatedSpeed = 150;
     this.fuelUse = 15;
     this.minuteLine = 2;
+    this.useLiveWeather = false;
+    this.weather = {};
+
+    this.propertiesService.GetLiveWeather().subscribe((response: any) => {
+      this.weather = response;
+      this.useLiveWeather = true;
+      this.setWindSpeed();
+    });
 
     this.setProperties();
   }
@@ -36,5 +48,13 @@ export class PropertiesComponent implements OnInit {
     }
 
     this.propertiesLocalService.setProperties(properties);
+  }
+
+  public setWindSpeed(): void {
+    if (this.useLiveWeather) {
+      this.windDirection = this.weather.wind.deg;
+      this.windSpeed = this.weather.wind.speed * 1.852;
+      this.setProperties();
+    }
   }
 }

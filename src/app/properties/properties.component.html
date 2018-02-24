@@ -5,11 +5,13 @@
     <p>Fuel Use: {{fuelUse}} l/h</p>
     <mat-slider min="0" max="50" step="0.25" (input)="fuelUse = $event.value" [ngModel]="fuelUse" (change)="setProperties()"></mat-slider>
 
+    <mat-slide-toggle [(ngModel)]="useLiveWeather" (change)="setWindSpeed()">Live Weather</mat-slide-toggle>
+
     <p>Wind Speed: {{windSpeed}} Km/h</p>
-    <mat-slider min="0" max="75" step="1" (input)="windSpeed = $event.value" [ngModel]="windSpeed" (change)="setProperties()"></mat-slider>
+    <mat-slider min="0" max="75" step="1" (input)="windSpeed = $event.value" [ngModel]="windSpeed" (change)="setProperties()" [disabled]="useLiveWeather"></mat-slider>
 
     <p>Wind Direction: {{windDirection}} Degrees</p>
-    <mat-slider min="0" max="359" step="1" (input)="windDirection = $event.value" [ngModel]="windDirection" (change)="setProperties()"></mat-slider>
+    <mat-slider min="0" max="359" step="1" (input)="windDirection = $event.value" [ngModel]="windDirection" (change)="setProperties()" [disabled]="useLiveWeather"></mat-slider>
 
     <p>Line after {{minuteLine}} minute{{minuteLine > 1 ? 's' : ''}}</p>
     <mat-slider min="1" max="20" step="1" (input)="minuteLine = $event.value" [ngModel]="minuteLine" (change)="setProperties()"></mat-slider>
