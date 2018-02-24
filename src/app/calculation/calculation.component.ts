@@ -150,6 +150,7 @@ export class CalculationComponent implements OnInit {
     this.map.on(L.Draw.Event.DELETED, () => {
       // deleted
       this.datasource = [];
+      this.clearMintueLines();
       this.calculateFlight();
     });
   }
@@ -263,7 +264,13 @@ export class CalculationComponent implements OnInit {
     return gpxfile;
   }
 
-  public saveGPXFile(): void {
+  private saveGPXFile(): void {
     this.electronService.ipcRenderer.send('route.save.gpx', this.exportToGPX());
+  }
+
+  public toolbarAction(event: any): void {
+    if (event.item.id === 'gpx') {
+      this.saveGPXFile();
+    }
   }
 }

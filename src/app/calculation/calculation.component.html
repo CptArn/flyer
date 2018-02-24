@@ -8,6 +8,8 @@
   [editSettings]="{ allowEditing: true, allowAdding: true, allowDeleting: true }"
   (actionComplete)="actionComplete($event)"
   height="150"
+  [toolbar]="[{ text: 'Save GPX', tooltipText: 'Save GPX', id: 'gpx'}]"
+  (toolbarClick)="toolbarAction($event)"
 >
 
 <!-- [toolbar]="['add', 'edit', 'delete']" -->
